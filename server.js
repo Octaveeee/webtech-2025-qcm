@@ -5,8 +5,27 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Servir les fichiers statiques
-app.use(express.static(path.join(__dirname)));
+// Servir les fichiers statiques (CSS, JS, images, etc.)
+app.use(express.static(__dirname));
+
+// Routes explicites pour les fichiers statiques
+app.get('/styles.css', (req, res) => {
+  res.sendFile(path.join(__dirname, 'styles.css'), {
+    headers: { 'Content-Type': 'text/css' }
+  });
+});
+
+app.get('/app.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'app.js'), {
+    headers: { 'Content-Type': 'application/javascript' }
+  });
+});
+
+app.get('/questions.json', (req, res) => {
+  res.sendFile(path.join(__dirname, 'questions.json'), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+});
 
 // Route pour servir index.html
 app.get('/', (req, res) => {

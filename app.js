@@ -23,11 +23,20 @@ function showScreen(screenName) {
 async function loadQuestions() {
     try {
         const response = await fetch('questions.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         questions = await response.json();
+        if (!questions || questions.length === 0) {
+            throw new Error('Le fichier questions.json est vide ou invalide');
+        }
         document.getElementById('total-questions').textContent = `${questions.length} questions disponibles`;
+        console.log('Questions chargées avec succès:', questions.length);
     } catch (error) {
         console.error('Erreur lors du chargement des questions:', error);
-        alert('Erreur lors du chargement des questions. Vérifiez que le fichier questions.json est présent.');
+        document.getElementById('total-questions').textContent = `Erreur: ${error.message}`;
+        document.getElementById('total-questions').style.color = 'red';
+        alert('Erreur lors du chargement des questions. Vérifiez la console pour plus de détails.');
     }
 }
 
@@ -333,9 +342,10 @@ document.getElementById('restart-btn').addEventListener('click', () => {
 });
 document.getElementById('download-btn').addEventListener('click', downloadResults);
 
-// Charger les questions au démarrage
-loadQuestions();
-
-// Afficher l'écran de démarrage au chargement
-showScreen('start');
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM chargé');
+    showScreen('start');
+    loadQuestions();
+});
 

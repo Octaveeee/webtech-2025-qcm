@@ -6,25 +6,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Servir les fichiers statiques (CSS, JS, images, etc.)
-app.use(express.static(__dirname));
+app.use(express.static(__dirname, {
+  maxAge: '1d',
+  etag: true
+}));
 
-// Routes explicites pour les fichiers statiques
-app.get('/styles.css', (req, res) => {
-  res.sendFile(path.join(__dirname, 'styles.css'), {
-    headers: { 'Content-Type': 'text/css' }
-  });
+// Routes explicites pour les fichiers statiques avec CORS
+app.get('/questions.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(__dirname, 'questions.json'));
 });
 
 app.get('/app.js', (req, res) => {
-  res.sendFile(path.join(__dirname, 'app.js'), {
-    headers: { 'Content-Type': 'application/javascript' }
-  });
-});
-
-app.get('/questions.json', (req, res) => {
-  res.sendFile(path.join(__dirname, 'questions.json'), {
-    headers: { 'Content-Type': 'application/json' }
-  });
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(__dirname, 'app.js'));
 });
 
 // Route pour servir index.html

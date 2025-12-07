@@ -4,85 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QCM - Technologies Web</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for toggle switches and animations */
+        .switch input:checked + .slider {
+            background-color: #667eea;
+        }
+        .switch input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        .slider:before {
+            content: "";
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: 0.4s;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .slide-down {
+            animation: slideDown 0.3s ease-out;
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
+<body class="min-h-screen flex items-center justify-center p-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden">
         <!-- Écran de démarrage -->
-        <div id="start-screen" class="screen active">
-            <div class="start-content">
-                <h1>🎓 QCM Technologies Web</h1>
-                <div class="stats">
+        <div id="start-screen" class="hidden p-10 min-h-[600px]">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-8" style="color: #667eea;">🎓 QCM Technologies Web</h1>
+                <div class="text-xl text-gray-600 mb-10">
                     <p id="total-questions">Chargement...</p>
                 </div>
-                <div class="settings">
-                    <label class="switch">
-                        <input type="checkbox" id="random-mode">
-                        <span class="slider"></span>
-                        <span class="label-text">Mode aléatoire</span>
+                <div class="flex flex-col gap-5 mb-10 items-center">
+                    <label class="switch relative flex items-center gap-4 cursor-pointer">
+                        <input type="checkbox" id="random-mode" class="opacity-0 w-0 h-0">
+                        <span class="slider relative w-12 h-7 bg-gray-300 rounded-full transition-all"></span>
+                        <span class="text-base text-gray-800">Mode aléatoire</span>
                     </label>
-                    <label class="switch">
-                        <input type="checkbox" id="show-answers">
-                        <span class="slider"></span>
-                        <span class="label-text">Afficher les bonnes réponses immédiatement</span>
+                    <label class="switch relative flex items-center gap-4 cursor-pointer">
+                        <input type="checkbox" id="show-answers" class="opacity-0 w-0 h-0">
+                        <span class="slider relative w-12 h-7 bg-gray-300 rounded-full transition-all"></span>
+                        <span class="text-base text-gray-800">Afficher les bonnes réponses immédiatement</span>
                     </label>
                 </div>
-                <button id="start-btn" class="btn btn-primary">Commencer le QCM</button>
+                <button id="start-btn" class="px-8 py-4 text-lg font-semibold text-white rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Commencer le QCM</button>
             </div>
         </div>
 
         <!-- Écran de question -->
-        <div id="question-screen" class="screen">
-            <div class="question-header">
-                <div class="progress-bar">
-                    <div id="progress" class="progress-fill"></div>
+        <div id="question-screen" class="hidden p-10 min-h-[600px]">
+            <div class="mb-8">
+                <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-4">
+                    <div id="progress" class="h-full transition-all duration-300" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); width: 0%;"></div>
                 </div>
-                <div class="question-info">
-                    <span id="question-number">1</span> / <span id="total-questions-display">243</span>
-                    <span id="original-number" class="original-number"></span>
+                <div class="flex justify-between items-center text-lg text-gray-600">
+                    <span>Question <span id="question-number">1</span> / <span id="total-questions-display">243</span></span>
+                    <span id="original-number" class="text-sm text-gray-400 italic"></span>
                 </div>
             </div>
             
-            <div class="question-content">
-                <h2 id="question-text"></h2>
+            <div>
+                <h2 id="question-text" class="text-2xl text-gray-800 mb-8 leading-relaxed"></h2>
                 
-                <div id="answers-container" class="answers-container"></div>
+                <div id="answers-container" class="flex flex-col gap-4 mb-8"></div>
                 
-                <!-- Section de résultat (affichée après validation) -->
-                <div id="result-section" class="result-section" style="display: none;">
-                    <div class="result-feedback">
-                        <div id="result-icon" class="result-icon-large"></div>
-                        <p id="result-message" class="result-message-large"></p>
+                <!-- Section de résultat -->
+                <div id="result-section" class="hidden my-8 p-6 rounded-2xl slide-down" style="background: #f8f9ff; border: 2px solid #e0e0e0;">
+                    <div class="text-center mb-6">
+                        <div id="result-icon" class="text-5xl mb-4"></div>
+                        <p id="result-message" class="text-2xl font-semibold"></p>
                     </div>
-                    <div id="correct-answers-display" class="correct-answers"></div>
+                    <div id="correct-answers-display" class="bg-white p-5 rounded-xl"></div>
                 </div>
                 
-                <div class="question-actions">
-                    <button id="submit-btn" class="btn btn-primary" disabled>Valider</button>
-                    <button id="next-btn" class="btn btn-primary" style="display: none;">Question suivante</button>
-                    <button id="quit-btn" class="btn btn-secondary">Quitter</button>
+                <div class="flex gap-4 justify-center mt-5 flex-wrap">
+                    <button id="submit-btn" class="px-8 py-4 text-lg font-semibold text-white rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" disabled>Valider</button>
+                    <button id="next-btn" class="hidden px-8 py-4 text-lg font-semibold text-white rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Question suivante</button>
+                    <button id="quit-btn" class="px-8 py-4 text-lg font-semibold text-gray-800 bg-gray-200 rounded-xl transition-all hover:bg-gray-300">Quitter</button>
                 </div>
             </div>
         </div>
 
         <!-- Écran de résumé final -->
-        <div id="summary-screen" class="screen">
-            <div class="summary-content">
-                <h1>📊 Résumé du QCM</h1>
-                <div class="score-display">
-                    <div class="score-circle">
+        <div id="summary-screen" class="hidden p-10 min-h-[600px]">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold mb-10" style="color: #667eea;">📊 Résumé du QCM</h1>
+                <div class="flex items-center justify-center gap-10 mb-10 flex-wrap">
+                    <div class="w-36 h-36 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                         <span id="score-percentage">0%</span>
                     </div>
-                    <div class="score-details">
-                        <p><strong id="score-text">0 / 0</strong></p>
-                        <p id="correct-count">✅ 0 bonnes réponses</p>
-                        <p id="incorrect-count">❌ 0 mauvaises réponses</p>
+                    <div class="text-left">
+                        <p class="text-2xl mb-2 text-gray-800"><strong id="score-text">0 / 0</strong></p>
+                        <p id="correct-count" class="text-xl mb-2 text-gray-700">✅ 0 bonnes réponses</p>
+                        <p id="incorrect-count" class="text-xl text-gray-700">❌ 0 mauvaises réponses</p>
                     </div>
                 </div>
-                <div id="results-list" class="results-list"></div>
-                <div class="summary-actions">
-                    <button id="restart-btn" class="btn btn-primary">Recommencer</button>
-                    <button id="download-btn" class="btn btn-secondary">Télécharger les résultats</button>
+                <div id="results-list" class="max-h-96 overflow-y-auto mb-8 text-left"></div>
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <button id="restart-btn" class="px-8 py-4 text-lg font-semibold text-white rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Recommencer</button>
+                    <button id="download-btn" class="px-8 py-4 text-lg font-semibold text-gray-800 bg-gray-200 rounded-xl transition-all hover:bg-gray-300">Télécharger les résultats</button>
                 </div>
             </div>
         </div>
@@ -91,4 +124,3 @@
     <script src="app.js"></script>
 </body>
 </html>
-

@@ -11,6 +11,14 @@ const startScreen = document.getElementById('start-screen');
 const questionScreen = document.getElementById('question-screen');
 const summaryScreen = document.getElementById('summary-screen');
 
+// Fonction pour afficher un écran
+function showScreen(screenName) {
+    [startScreen, questionScreen, summaryScreen].forEach(screen => screen.classList.add('hidden'));
+    if (screenName === 'start') startScreen.classList.remove('hidden');
+    else if (screenName === 'question') questionScreen.classList.remove('hidden');
+    else if (screenName === 'summary') summaryScreen.classList.remove('hidden');
+}
+
 // Charger les questions
 async function loadQuestions() {
     try {
@@ -60,9 +68,7 @@ function showQuestion() {
     const { question: q, originalIndex } = shuffledQuestions[currentQuestionIndex];
     
     // Mettre à jour l'écran
-    startScreen.classList.remove('active');
-    summaryScreen.classList.remove('active');
-    questionScreen.classList.add('active');
+    showScreen('question');
     
     // Cacher la section de résultat
     document.getElementById('result-section').style.display = 'none';
@@ -88,16 +94,15 @@ function showQuestion() {
     
     q.answers.forEach((answer, index) => {
         const answerDiv = document.createElement('div');
-        answerDiv.className = 'answer-option';
+        answerDiv.className = 'p-5 border-2 border-gray-200 rounded-xl cursor-pointer transition-all hover:border-purple-500 hover:bg-purple-50 flex items-center gap-4 bg-white';
         answerDiv.dataset.index = index;
         
         answerDiv.innerHTML = `
-            <div class="answer-checkbox"></div>
-            <div class="answer-text">${answer}</div>
+            <div class="w-6 h-6 border-2 border-gray-300 rounded-md flex items-center justify-center flex-shrink-0 transition-all"></div>
+            <div class="flex-1 text-lg text-gray-800">${answer}</div>
         `;
         
         answerDiv.addEventListener('click', () => toggleAnswer(answerDiv, index));
-        answerDiv.style.pointerEvents = 'auto';
         answersContainer.appendChild(answerDiv);
     });
     
@@ -111,19 +116,30 @@ function showQuestion() {
 
 // Toggle une réponse
 function toggleAnswer(element, index) {
-    element.classList.toggle('selected');
+    const checkbox = element.querySelector('div');
+    const isSelected = element.classList.contains('border-purple-500');
+    
+    if (isSelected) {
+        element.classList.remove('border-purple-500', 'bg-purple-50');
+        checkbox.classList.remove('bg-purple-600', 'border-purple-600');
+        checkbox.innerHTML = '';
+    } else {
+        element.classList.add('border-purple-500', 'bg-purple-50');
+        checkbox.classList.add('bg-purple-600', 'border-purple-600');
+        checkbox.innerHTML = '<span class="text-white text-sm font-bold">✓</span>';
+    }
     updateSubmitButton();
 }
 
 // Mettre à jour le bouton de validation
 function updateSubmitButton() {
-    const selected = document.querySelectorAll('.answer-option.selected');
+    const selected = document.querySelectorAll('.border-purple-500.bg-purple-50');
     document.getElementById('submit-btn').disabled = selected.length === 0;
 }
 
 // Valider la réponse
 function submitAnswer() {
-    const selectedElements = document.querySelectorAll('.answer-option.selected');
+    const selectedElements = document.querySelectorAll('.border-purple-500.bg-purple-50');
     const selectedIndices = Array.from(selectedElements).map(el => parseInt(el.dataset.index));
     
     const { question: q } = shuffledQuestions[currentQuestionIndex];
@@ -169,12 +185,13 @@ function showResult(isCorrect, q, selectedIndices, correctIndices) {
     const nextBtn = document.getElementById('next-btn');
     
     // Afficher la section de résultat
-    resultSection.style.display = 'block';
+    resultSection.classList.remove('hidden');
     
     // Désactiver les réponses
-    const answerOptions = document.querySelectorAll('.answer-option');
+    const answerOptions = document.querySelectorAll('[data-index]');
     answerOptions.forEach(option => {
         option.style.pointerEvents = 'none';
+        option.classList.remove('cursor-pointer', 'hover:border-purple-500', 'hover:bg-purple-50');
     });
     
     // Afficher le résultat
@@ -190,29 +207,33 @@ function showResult(isCorrect, q, selectedIndices, correctIndices) {
     
     // Afficher les bonnes réponses
     if (correctIndices.length > 0) {
-        let html = '<h3>Bonnes réponses :</h3><ul>';
+        let html = '<h3 class="text-xl font-semibold mb-4" style="color: #667eea;">Bonnes réponses :</h3><ul class="list-none p-0">';
         correctIndices.forEach(idx => {
             const isSelected = selectedIndices.includes(idx);
-            html += `<li>${isSelected ? '✅' : '✓'} ${q.answers[idx]}</li>`;
+            html += `<li class="p-3 mb-2 bg-white rounded-lg border-l-4 border-green-500">${isSelected ? '✅' : '✓'} ${q.answers[idx]}</li>`;
         });
         html += '</ul>';
         correctAnswersDisplay.innerHTML = html;
     } else {
-        correctAnswersDisplay.innerHTML = '<p>Aucune bonne réponse définie pour cette question.</p>';
+        correctAnswersDisplay.innerHTML = '<p class="text-gray-600">Aucune bonne réponse définie pour cette question.</p>';
     }
     
     // Mettre à jour les styles des réponses
     answerOptions.forEach((option, index) => {
-        option.classList.remove('correct', 'incorrect', 'should-be-selected');
+        const checkbox = option.querySelector('div');
+        option.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50', 'border-green-400', 'bg-green-100');
         
         if (selectedIndices.includes(index)) {
             if (correctIndices.includes(index)) {
-                option.classList.add('correct');
+                option.classList.add('border-green-500', 'bg-green-50');
+                checkbox.classList.add('bg-green-500', 'border-green-500');
             } else {
-                option.classList.add('incorrect');
+                option.classList.add('border-red-500', 'bg-red-50');
+                checkbox.classList.add('bg-red-500', 'border-red-500');
             }
         } else if (correctIndices.includes(index)) {
-            option.classList.add('should-be-selected');
+            option.classList.add('border-green-400', 'bg-green-100');
+            checkbox.classList.add('bg-green-400', 'border-green-400');
         }
     });
     
@@ -233,8 +254,7 @@ function nextQuestion() {
 
 // Afficher le résumé
 function showSummary() {
-    questionScreen.classList.remove('active');
-    summaryScreen.classList.add('active');
+    showScreen('summary');
     
     const questionsWithAnswers = results.filter(r => r.correctIndices.length > 0);
     const correctCount = results.filter(r => r.isCorrect).length;
@@ -253,19 +273,20 @@ function showSummary() {
     
     results.forEach((result, index) => {
         const resultDiv = document.createElement('div');
-        resultDiv.className = `result-item ${result.isCorrect ? 'correct' : 'incorrect'}`;
+        const borderColor = result.isCorrect ? 'border-green-500' : 'border-red-500';
+        resultDiv.className = `p-4 mb-4 rounded-xl ${borderColor} border-l-4 bg-gray-50`;
         
         let selectedText = result.selectedAnswers.length === 1 
             ? result.selectedAnswers[0]
             : result.selectedAnswers.join(', ');
         
         resultDiv.innerHTML = `
-            <h3>Question ${index + 1}: ${result.question}</h3>
-            <p><strong>Votre réponse:</strong> ${selectedText}</p>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Question ${index + 1}: ${result.question}</h3>
+            <p class="text-gray-700 mb-1"><strong>Votre réponse:</strong> ${selectedText}</p>
             ${result.correctIndices.length > 0 ? `
-                <p><strong>Bonne(s) réponse(s):</strong> ${result.correctAnswers.join(', ')}</p>
-                <p>${result.isCorrect ? '✅ Correct' : '❌ Incorrect'}</p>
-            ` : '<p>⚠️ Aucune bonne réponse définie</p>'}
+                <p class="text-gray-700 mb-1"><strong>Bonne(s) réponse(s):</strong> ${result.correctAnswers.join(', ')}</p>
+                <p class="font-semibold">${result.isCorrect ? '✅ Correct' : '❌ Incorrect'}</p>
+            ` : '<p class="text-yellow-600">⚠️ Aucune bonne réponse définie</p>'}
         `;
         
         resultsList.appendChild(resultDiv);
@@ -314,4 +335,7 @@ document.getElementById('download-btn').addEventListener('click', downloadResult
 
 // Charger les questions au démarrage
 loadQuestions();
+
+// Afficher l'écran de démarrage au chargement
+showScreen('start');
 

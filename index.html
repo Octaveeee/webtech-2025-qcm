@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM - Technologies Web</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Écran de démarrage -->
+        <div id="start-screen" class="screen active">
+            <div class="start-content">
+                <h1>🎓 QCM Technologies Web</h1>
+                <div class="stats">
+                    <p id="total-questions">Chargement...</p>
+                </div>
+                <div class="settings">
+                    <label class="switch">
+                        <input type="checkbox" id="random-mode">
+                        <span class="slider"></span>
+                        <span class="label-text">Mode aléatoire</span>
+                    </label>
+                    <label class="switch">
+                        <input type="checkbox" id="show-answers">
+                        <span class="slider"></span>
+                        <span class="label-text">Afficher les bonnes réponses immédiatement</span>
+                    </label>
+                </div>
+                <button id="start-btn" class="btn btn-primary">Commencer le QCM</button>
+            </div>
+        </div>
+
+        <!-- Écran de question -->
+        <div id="question-screen" class="screen">
+            <div class="question-header">
+                <div class="progress-bar">
+                    <div id="progress" class="progress-fill"></div>
+                </div>
+                <div class="question-info">
+                    <span id="question-number">1</span> / <span id="total-questions-display">243</span>
+                    <span id="original-number" class="original-number"></span>
+                </div>
+            </div>
+            
+            <div class="question-content">
+                <h2 id="question-text"></h2>
+                
+                <div id="answers-container" class="answers-container"></div>
+                
+                <!-- Section de résultat (affichée après validation) -->
+                <div id="result-section" class="result-section" style="display: none;">
+                    <div class="result-feedback">
+                        <div id="result-icon" class="result-icon-large"></div>
+                        <p id="result-message" class="result-message-large"></p>
+                    </div>
+                    <div id="correct-answers-display" class="correct-answers"></div>
+                </div>
+                
+                <div class="question-actions">
+                    <button id="submit-btn" class="btn btn-primary" disabled>Valider</button>
+                    <button id="next-btn" class="btn btn-primary" style="display: none;">Question suivante</button>
+                    <button id="quit-btn" class="btn btn-secondary">Quitter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Écran de résumé final -->
+        <div id="summary-screen" class="screen">
+            <div class="summary-content">
+                <h1>📊 Résumé du QCM</h1>
+                <div class="score-display">
+                    <div class="score-circle">
+                        <span id="score-percentage">0%</span>
+                    </div>
+                    <div class="score-details">
+                        <p><strong id="score-text">0 / 0</strong></p>
+                        <p id="correct-count">✅ 0 bonnes réponses</p>
+                        <p id="incorrect-count">❌ 0 mauvaises réponses</p>
+                    </div>
+                </div>
+                <div id="results-list" class="results-list"></div>
+                <div class="summary-actions">
+                    <button id="restart-btn" class="btn btn-primary">Recommencer</button>
+                    <button id="download-btn" class="btn btn-secondary">Télécharger les résultats</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+

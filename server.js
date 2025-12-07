@@ -24,6 +24,12 @@ app.get('/app.js', (req, res) => {
   res.sendFile(path.join(__dirname, 'app.js'));
 });
 
+app.get('/questions.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(__dirname, 'questions.js'));
+});
+
 // Route pour servir index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));

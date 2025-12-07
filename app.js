@@ -1,5 +1,5 @@
 // Configuration
-let questions = [];
+let questions = typeof QUESTIONS !== 'undefined' ? QUESTIONS : [];
 let currentQuestionIndex = 0;
 let results = [];
 let randomMode = false;
@@ -20,24 +20,32 @@ function showScreen(screenName) {
 }
 
 // Charger les questions
-async function loadQuestions() {
+function loadQuestions() {
     try {
-        // Essayer d'abord l'API route, puis le fichier statique
-        let response = await fetch('/api/questions');
-        if (!response.ok) {
-            // Fallback sur le fichier statique
-            response = await fetch('questions.json');
+        // Les questions sont déjà chargées depuis questions.js
+        if (typeof QUESTIONS !== 'undefined') {
+            questions = QUESTIONS;
+        } else {
+            // Fallback: essayer de charger depuis l'API ou le fichier JSON
+            fetch('/api/questions')
+                .then(response => response.ok ? response.json() : fetch('questions.json').then(r => r.json()))
+                .then(data => {
+                    questions = data;
+                    updateQuestionsDisplay();
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    document.getElementById('total-questions').textContent = `Erreur: ${error.message}`;
+                    document.getElementById('total-questions').classList.add('text-red-500');
+                });
+            return;
         }
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        questions = await response.json();
         if (!questions || questions.length === 0) {
-            throw new Error('Le fichier questions.json est vide ou invalide');
+            throw new Error('Aucune question disponible');
         }
-        document.getElementById('total-questions').textContent = `${questions.length} questions disponibles`;
+        
+        updateQuestionsDisplay();
         console.log('Questions chargées avec succès:', questions.length);
     } catch (error) {
         console.error('Erreur lors du chargement des questions:', error);
@@ -45,6 +53,10 @@ async function loadQuestions() {
         totalQuestionsEl.textContent = `Erreur: ${error.message}`;
         totalQuestionsEl.classList.add('text-red-500');
     }
+}
+
+function updateQuestionsDisplay() {
+    document.getElementById('total-questions').textContent = `${questions.length} questions disponibles`;
 }
 
 // Mélanger les questions (Fisher-Yates)

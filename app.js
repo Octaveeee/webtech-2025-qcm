@@ -22,10 +22,17 @@ function showScreen(screenName) {
 // Charger les questions
 async function loadQuestions() {
     try {
-        const response = await fetch('questions.json');
+        // Essayer d'abord l'API route, puis le fichier statique
+        let response = await fetch('/api/questions');
+        if (!response.ok) {
+            // Fallback sur le fichier statique
+            response = await fetch('questions.json');
+        }
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
         questions = await response.json();
         if (!questions || questions.length === 0) {
             throw new Error('Le fichier questions.json est vide ou invalide');
@@ -34,9 +41,9 @@ async function loadQuestions() {
         console.log('Questions chargées avec succès:', questions.length);
     } catch (error) {
         console.error('Erreur lors du chargement des questions:', error);
-        document.getElementById('total-questions').textContent = `Erreur: ${error.message}`;
-        document.getElementById('total-questions').style.color = 'red';
-        alert('Erreur lors du chargement des questions. Vérifiez la console pour plus de détails.');
+        const totalQuestionsEl = document.getElementById('total-questions');
+        totalQuestionsEl.textContent = `Erreur: ${error.message}`;
+        totalQuestionsEl.classList.add('text-red-500');
     }
 }
 

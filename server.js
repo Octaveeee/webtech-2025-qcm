@@ -29,14 +29,21 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Route API pour obtenir les questions (optionnel, si besoin)
+// Route API pour obtenir les questions (prioritaire pour Vercel)
 app.get('/api/questions', (req, res) => {
   try {
-    const questionsData = fs.readFileSync(path.join(__dirname, 'questions.json'), 'utf8');
+    const questionsPath = path.join(__dirname, 'questions.json');
+    if (!fs.existsSync(questionsPath)) {
+      return res.status(404).json({ error: 'Fichier questions.json introuvable' });
+    }
+    const questionsData = fs.readFileSync(questionsPath, 'utf8');
     const questions = JSON.parse(questionsData);
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
     res.json(questions);
   } catch (error) {
-    res.status(500).json({ error: 'Erreur lors du chargement des questions' });
+    console.error('Erreur API questions:', error);
+    res.status(500).json({ error: 'Erreur lors du chargement des questions', details: error.message });
   }
 });
 
